@@ -3,13 +3,18 @@
 <head>
 	<title>Isometric Map</title>
 	<style type="text/css">
-		body{background-color:#FFF}
+		body{background-color:#FFF; margin: 0; padding: 0; display:flex; justify-content: space-around;}
+		.container{position: relative;}
+		.tilemap-screen{border:1px solid #000000;}
+		.character-screen{position:absolute; z-index: 2; left:0; top:0;}
 	</style>
 </head>
 <body>
 
-	<canvas id="tileMap" style="border:1px solid #000000;"></canvas>
-	<canvas id="character"></canvas>
+	<div class="container">
+		<canvas id="tileMap" class="tilemap-screen"></canvas>
+		<canvas id="character" class="character-screen"></canvas>
+	</div>
 
 </body>
 
