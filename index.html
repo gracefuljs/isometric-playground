@@ -4,16 +4,16 @@
 	<title>Isometric Map</title>
 	<style type="text/css">
 		body{background-color:#FFF; margin: 0; padding: 0; display:flex; justify-content: space-around;}
-		.container{position: relative;}
-		.tilemap-screen{border:1px solid #000000;}
-		.character-screen{position:absolute; z-index: 2; left:0; top:0;}
+		.container{position: relative; margin:0; padding: 0;}
+		.tilemap-screen{margin:0; padding: 0; display: block;}
+		.character-screen{position:absolute; z-index: 2; left:0; top:0; margin:0; padding: 0; display: block;}
 	</style>
 </head>
 <body>
 
 	<div class="container">
 		<canvas id="tileMap" class="tilemap-screen"></canvas>
-		<canvas id="character" class="character-screen"></canvas>
+		<canvas id="characterMap" class="character-screen"></canvas>
 	</div>
 
 </body>
