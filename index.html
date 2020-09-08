@@ -4,19 +4,23 @@
 	<title>Isometric Map</title>
 	<style type="text/css">
 		body{background-color:#FFF; margin: 0; padding: 0; display:flex; justify-content: space-around;}
-		.container{position: relative; margin:0; padding: 0;}
+		.container{position: relative; margin:0; padding: 0; display:block;}
+		.screen-layer{position:absolute; left:0; top:0; margin:0; padding: 0; display: block;}
 		.tilemap-screen{margin:0; padding: 0; display: block;}
-		.character-screen{position:absolute; z-index: 2; left:0; top:0; margin:0; padding: 0; display: block;}
+		.layer1-screen{position:absolute; z-index: 2; left:0; top:0; margin:0; padding: 0; display: block;}
+		.character-screen{position:absolute; z-index: 3; left:0; top:0; margin:0; padding: 0; display: block;}
 	</style>
 </head>
 <body>
 
 	<div class="container">
-		<canvas id="tileMap" class="tilemap-screen"></canvas>
-		<canvas id="characterMap" class="character-screen"></canvas>
 	</div>
 
 </body>
 
-<script src="js/index.js"></script>
+<script src="js/pathfinder.js" type="module"></script>
+<script src="js/screen.js" type="module"></script>
+<script src="js/character.js" type="module"></script>
+<script src="js/tilemap.js" type="module"></script>
+<script src="js/index.js" type="module"></script>
 </html>

@@ -1,20 +1,110 @@
-window.onload = function(){
-	let tileMap    = document.getElementById("tileMap"),
-		charaMap   = document.getElementById("characterMap"),
-		mapCtx     = tileMap.getContext("2d"),
-		charaCtx   = charaMap.getContext("2d"),
-		width      = charaMap.width  = tileMap.width  = window.innerWidth,
-		height     = charaMap.height = tileMap.height = window.innerHeight;
-		
-	//Tiles are conventionally twice as wide as they are tall.
-	let	tileWidth  = 60,
-		tileHeight = 30; 
+import { Pathfinder } from './pathfinder.js';
+import { Screen, Layer } from './screen.js';
+import { TileMap } from './tilemap.js';
+import { Character } from './character.js';
+import { Input } from './input.js';
 
-	//Set the character's position
-	let charaX = 7;
-	let charaY = 6;
+(function(){
+
+	class Game{
+		constructor(){
+			this.screen = null;
+			this.tileMap = null;
+			this.inputHandler = new Input();
+			this.characters = new Map();
+			this.player = null;
+		};
+
+		init(){
+			this.loadGraphics();
+			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
+		};
+
+		initScreen(container, width, height){
+			this.screen = new Screen(container, width, height);
+		};
+
+		initTileMap(width, height, tileWidth, tileHeight, imgURL, gridData){
+			let layer = this.getTileMapLayer();
+
+			this.tileMap = new TileMap(layer, width, height, tileWidth, tileHeight, imgURL);
+			this.tileMap.loadBitmap();
+			layer.addChild(this.tileMap);
+
+			this.tileMap.setGridData(grid);
+		};
+
+		initPlayer(name, x, y, imgURL){
+			let layer = this.getCharacterLayer();
+
+			this.player = new Character(name, x, y, imgURL);
+			this.player.setLayer( layer );
+			this.player.loadBitmap( () => {
+				[this.x, this.y] = this.player.getPosition(this.tileMap, x, y);
+			});
+			window.addEventListener("keydown", (event) => {this.player.startCharacterMove(event, this.tileMap)});
+			layer.addChild(this.player);
+			this.registerCharacter("player", this.player);
+		};
+
+		registerCharacter(characterID, characterObject){
+			this.characters.set(characterID, characterObject)
+		};
 
 
+		loadGraphics(){};
+
+		update(){
+			this.player.update(this.tileMap, this.player.x, this.player.y);
+		};
+
+		loop(timestamp){
+			this.update();
+			this.screen.clearScreen();
+			this.screen.draw(this.inputHandler);
+			this.player.draw(this.player.xPos, this.player.yPos);
+			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
+		};
+
+		mouseHandler(event){
+			this.inputHandler.mouseHandler(this.screen, this.tileMap, event);
+			
+			let [screenX, screenY] = this.inputHandler.getMouseCoords();
+			//this.screen.getScreenCoordsWithOffset(...this.inputHandler.getMouseCoords());
+			this.tileMap.onMouseMove(screenX, screenY);
+		};
+
+		clickHandler(event){
+			this.inputHandler.clickHandler(this.screen, this.tileMap, event);
+			let [screenX, screenY] = this.inputHandler.getMouseCoords();
+			this.tileMap.onMouseClick(screenX, screenY);
+			let path = this.player.pathfinder.search(this.tileMap, this.player.x, this.player.y, this.tileMap.clickedTile[0], this.tileMap.clickedTile[1]);
+
+			this.tileMap.path = path;
+		};
+
+
+		getScreenWidth(){
+			return this.screen.width
+		};
+
+		getScreenHeight(){
+			return this.screen.height
+		};
+
+		getTileMapLayer(){
+			return this.screen.getScreenLayer("tileMap")
+		};
+
+		getCharacterLayer(){
+			return this.screen.getScreenLayer("characterMap")
+		};
+
+	};
+
+
+
+	//Game Data
 	let grid = [
 		[15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
 		[15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
@@ -25,126 +115,35 @@ window.onload = function(){
 		[ 8,  8,  8,  1,  1,  8,  8,  8,  8,  8,  8,  8,  8, 10,  8, 15],
 		[15,  8,  8,  1,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, 10, 15],
 		[15,  8,  1,  1,  8,  8,  8,  7,  7,  7,  8,  8,  8,  8,  8, 15],
-		[15,  1,  1,  8,  8,  8,  8,  8,  7,  7,  8,  8,  8,  8,  8, 15],
+		[15,  1,  1,  8,  8,  15, 8,  8,  7,  7,  8,  8,  8,  8,  8, 15],
 		[15,  1,  8,  8,  8,  8,  8,  8,  7,  7,  7,  8,  8,  8,  8, 15],
 		[15,  1,  8,  8,  8,  8,  8,  8,  8,  8,  7,  7,  8,  8,  8, 15],
 		[15,  1,  1,  1, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
 		[15,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1, 15],
 		[15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15],
-	]
+	];
 
-	//Move the origin of the tile map to the center of the screen
-	mapCtx.translate(width / 2, 50);
-	charaCtx.translate(width / 2, 50);
+	//Game
+	let game = new Game();
+	let container = document.querySelector(".container");
+	game.initScreen(container, window.innerWidth, window.innerHeight);
+
+	//Game layers
+	game.screen.createLayer("tileMap");
+	game.screen.createLayer("undercharacter");
+	game.screen.createLayer("characterMap");
+	game.screen.createLayer("guiMap");
+
+	//Game Object
+	game.initTileMap(game.getScreenWidth(), game.getScreenHeight(), 60, 30, "images/tileset.png", grid);
+	game.initPlayer("Violet", 1, 8, "images/character2.png");
+
+
+	window.addEventListener("load",()=>{ game.init()});
+	document.querySelector(".container").addEventListener("mousemove", (event) => {game.mouseHandler(event)});
+	window.addEventListener("resize", () => {game.screen.updateScreen(window.innerWidth, window.innerHeight)});
+	document.querySelector(".container").addEventListener("click", (event)=>{game.clickHandler(event)})
+
+
 	
-	//Load the assets before drawing the screen.
-	let img = document.createElement("img");
-	img.addEventListener("load", () => {draw()});
-	img.src = "images/tileset.png";
-
-	//Load the character's image before drawing the character
-	let chara = document.createElement("img");
-	chara.addEventListener("load", () => { drawCharacter(charaX, charaY)} );
-	chara.src = "images/character.png";
-	window.addEventListener("keydown", moveCharacter);
-
-	//This character is drawn on his own canvas
-	function drawCharacter(x, y){
-		let [tileX, tileY] = getTileCoords(x, y);
-		charaCtx.clearRect(-width / 2, -50, width, height)
-		charaCtx.drawImage(chara, tileX + 11, tileY - 11);
-	};
-
-	//This particular render method draws the tiles in a diamond shape, where the grid looks like a standard cartesian grid only rotated.
-	function draw(){
-		for(let y = 0; y < grid.length; y ++){
-			
-			let row = grid[y];
-			for(let x = 0; x < row.length; x++){
-				drawImageTile(x, y, row[x]);
-			}
-		}
-	};
-
-
-	function getTileCoords(x, y){
-		//To move to the next tile, we must move 1/2 tile width on the x axis, and 1/2 tile width on the y axis.
-		//Additionally, an isometric move has a cartesian x and y component, so moving along either isometric axis affects both cartesian x and y.
-		let tileX = (x - y) * (tileWidth / 2); //When moving along the x isometric axis the cartesian x increases and the y decreases.
-		let tileY = (x + y) * (tileHeight / 2); //When moving along the y isometric axis the cartesian x increases and the y increases.
-
-		return [ tileX, tileY ]
-	};
-
-	//Just a little tweak to make water tiles appear slightly lower on the map.
-	const waterHeightOffset = (index) => ( index < 4 ) ? 5 : 0;
-
-	function drawImageTile(x, y, index){
-		let [tileX, tileY] = getTileCoords(x, y);
-		mapCtx.drawImage(img, index * tileWidth, 0, tileWidth, img.height, tileX, tileY + waterHeightOffset(index), tileWidth, img.height);
-
-	};
-
-	function moveCharacter(event){
-		switch(event.key){
-			
-			case "ArrowUp": 
-				if(canTraverse(charaX - 1, charaY)){
-					charaX --;
-					drawCharacter(charaX, charaY);
-				}
-				
-				break;
-
-			case "ArrowDown":
-				if(canTraverse(charaX + 1, charaY)){
-					charaX ++;
-					drawCharacter(charaX, charaY);
-				} 
-				
-				break;
-			
-			case "ArrowLeft": 
-				if(canTraverse(charaX, charaY + 1)){
-					charaY ++;
-					drawCharacter(charaX, charaY);
-				}
-				
-				break;
-			
-			case "ArrowRight": 
-				if(canTraverse(charaX, charaY - 1)){
-					charaY --;
-					drawCharacter(charaX, charaY);
-				}
-
-				break;
-		}
-	};
-
-	function canTraverse(x, y){
-		
-		//Convert any position variables to integers
-		x = Math.floor(x);
-		y = Math.floor(y);
-
-		let barrierTileIndexes = [0, 1, 2, 3, 15]; //Tiles that the character can't walk over.
-
-		//Check to see if the prospective tile is out of bounds.
-		if( y < 0 || y > grid.length){
-			return false
-		}
-
-		if ( x < 0 || x > grid[y].length){
-			return false
-		}
-
-		//Check to see if the prospective tile is a barrier tile
-		if ( barrierTileIndexes.indexOf(grid[y][x]) > -1){
-			return false
-		}
-
-		return true
-	}
-
-}
+})()
