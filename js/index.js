@@ -13,6 +13,7 @@ import { Input } from './input.js';
 			this.inputHandler = new Input();
 			this.characters = new Map();
 			this.player = null;
+			this._last
 		};
 
 		init(){
@@ -42,7 +43,6 @@ import { Input } from './input.js';
 			this.player.loadBitmap( () => {
 				[this.x, this.y] = this.player.getPosition(this.tileMap, x, y);
 			});
-			window.addEventListener("keydown", (event) => {this.player.startCharacterMove(event, this.tileMap)});
 			layer.addChild(this.player);
 			this.registerCharacter("player", this.player);
 		};
@@ -54,12 +54,12 @@ import { Input } from './input.js';
 
 		loadGraphics(){};
 
-		update(){
+		update(timestamp){
 			this.player.update(this.tileMap, this.player.x, this.player.y);
 		};
 
 		loop(timestamp){
-			this.update();
+			this.update(timestamp);
 			this.screen.clearScreen();
 			this.screen.draw(this.inputHandler);
 			this.player.draw(this.player.xPos, this.player.yPos);
@@ -81,6 +81,17 @@ import { Input } from './input.js';
 			let path = this.player.pathfinder.search(this.tileMap, this.player.x, this.player.y, this.tileMap.clickedTile[0], this.tileMap.clickedTile[1]);
 
 			this.tileMap.path = path;
+			this.player.setPath(path);
+		};
+
+		keyHandler(event){
+			this.inputHandler.keyHandler(event);
+			
+			if( this.inputHandler.isKeyDirectional() ){
+				let key = this.inputHandler.getKey();
+				let directionIndex = this.inputHandler.DIRECTIONS.indexOf(key);
+				this.player.startCharacterMove(directionIndex, this.tileMap)
+			};
 		};
 
 
@@ -142,7 +153,8 @@ import { Input } from './input.js';
 	window.addEventListener("load",()=>{ game.init()});
 	document.querySelector(".container").addEventListener("mousemove", (event) => {game.mouseHandler(event)});
 	window.addEventListener("resize", () => {game.screen.updateScreen(window.innerWidth, window.innerHeight)});
-	document.querySelector(".container").addEventListener("click", (event)=>{game.clickHandler(event)})
+	document.querySelector(".container").addEventListener("click", (event)=>{game.clickHandler(event)});
+	window.addEventListener("keydown", (event)=>{game.keyHandler(event)})
 
 
 	

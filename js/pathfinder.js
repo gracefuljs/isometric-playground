@@ -146,7 +146,6 @@ Pathfinder.prototype.removeNodeFromList = function(arr, node){
 
 Pathfinder.prototype.search = function(tileMap, startX, startY, goalX, goalY){
 
-	console.log("Search!");
 	this.initLists();
 	
 	this.startPoint = new Node(startX, startY);
@@ -155,16 +154,12 @@ Pathfinder.prototype.search = function(tileMap, startX, startY, goalX, goalY){
 	this.openNodes.push(this.startPoint);
 
 	this.currentNode = this.startPoint;
-	console.log(this.startPoint.x, this.startPoint.y)
-	console.log(this.goalPoint.x, this.goalPoint.y)
 
     while(this.openNodes.length > 0){	
 
 		if(this.currentNode.y === this.goalPoint.y && this.currentNode.x === this.goalPoint.x){
 		    
 		    this.retracePath(this.currentNode);
-
-		    console.log(this.finalPath)
 
  		    return this.finalPath
 		   
