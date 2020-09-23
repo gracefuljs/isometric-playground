@@ -30,7 +30,6 @@ class Character{
 			y = this._yPixel;
 		};
 
-		this.layer.clear();
 		this.layer.drawImage(this.bitmap, x - this.bitmap.width / 2, y - this.bitmap.height);
 	};
 

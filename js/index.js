@@ -13,7 +13,7 @@ import { Input } from './input.js';
 			this.inputHandler = new Input();
 			this.characters = new Map();
 			this.player = null;
-			this._last
+			this._lastTick = null;
 		};
 
 		init(){
@@ -47,6 +47,18 @@ import { Input } from './input.js';
 			this.registerCharacter("player", this.player);
 		};
 
+		createCharacter(name, x, y, imgURL){
+			let layer = this.getCharacterLayer();
+
+			let character = new Character(name, x, y, imgURL);
+			character.setLayer(layer);
+			character.loadBitmap( () => {
+				console.log(`Character ${name} has been loaded.`)
+			});
+			layer.addChild(character);
+			this.registerCharacter(name, character);
+		};
+
 		registerCharacter(characterID, characterObject){
 			this.characters.set(characterID, characterObject)
 		};
@@ -55,14 +67,15 @@ import { Input } from './input.js';
 		loadGraphics(){};
 
 		update(timestamp){
-			this.player.update(this.tileMap, this.player.x, this.player.y);
+			this.characters.forEach( (character) => {character.update(this.tileMap, character.x, character.y)}, this );
 		};
 
 		loop(timestamp){
 			this.update(timestamp);
 			this.screen.clearScreen();
 			this.screen.draw(this.inputHandler);
-			this.player.draw(this.player.xPos, this.player.yPos);
+			//this.screen
+			//this.player.draw(this.player.xPos, this.player.yPos);
 			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
 		};
 
@@ -142,12 +155,16 @@ import { Input } from './input.js';
 	//Game layers
 	game.screen.createLayer("tileMap");
 	game.screen.createLayer("undercharacter");
-	game.screen.createLayer("characterMap");
+	game.screen.createLayer("characterMap", true);
 	game.screen.createLayer("guiMap");
 
 	//Game Object
 	game.initTileMap(game.getScreenWidth(), game.getScreenHeight(), 60, 30, "images/tileset.png", grid);
-	game.initPlayer("Violet", 1, 8, "images/character2.png");
+	game.initPlayer("Violet", 1, 8, "images/violet.png");
+
+	game.createCharacter("Jenna", 4, 7, "images/jenna.png");
+	game.createCharacter("Alaya", 11, 5, "images/alaya.png");
+	game.createCharacter("Shie", 1, 2, "images/shie.png");
 
 
 	window.addEventListener("load",()=>{ game.init()});

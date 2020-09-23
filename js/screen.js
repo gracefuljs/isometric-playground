@@ -10,8 +10,8 @@ class Screen{
 			this.layers = new Map();
 		};
 
-		createLayer(name){
-			let newLayer = new Layer(name, this.width, this.height);
+		createLayer(name, shouldSort){
+			let newLayer = new Layer(name, this.width, this.height, shouldSort);
 			newLayer.canvas.setAttribute("class", "screen-layer");
 			newLayer.canvas.style.zIndex = this.layers.length;
 
@@ -69,7 +69,7 @@ class Screen{
 	};
 
 		class Layer{
-		constructor(name, width, height){
+		constructor(name, width, height, shouldSort = false){
 			this.canvas = document.createElement("canvas");
 			this.canvas.id = `${name}-canvas`;
 
@@ -78,6 +78,7 @@ class Screen{
 			this.context = this.canvas.getContext("2d");
 			this.context.translate(width / 2, 50);
 			this.children = [];
+			this.shouldSort = shouldSort;
 		};
 
 		clear(){
@@ -89,7 +90,15 @@ class Screen{
 			this.canvas.height = height;
 		};
 
+		sortChildren(){
+			if(!this.shouldSort) return false;
+
+			this.children.sort( (a, b) => a.y - b.y)
+		}
+
 		draw(){
+			this.clear();
+			this.sortChildren();
 			this.children.forEach((child) => {
 				child.draw();
 			})
