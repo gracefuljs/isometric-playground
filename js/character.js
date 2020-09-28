@@ -9,6 +9,8 @@ class Character{
 		this._yPixel;
 		this.destX = x;
 		this.destY = y;
+		this.prevX = x;
+		this.prevY = y;
 		this._path = [];
 		this.pathfinder = new Pathfinder(this);
 		this.imgURL = imgURL;
@@ -63,6 +65,11 @@ class Character{
 		this.y = y;
 	};
 
+	setPreviousPosition(x, y){
+		this.prevX = x;
+		this.prevY = y;
+	};
+
 	//All of the conversion to isometric happens in this function. All other movement and positioning uses grid unit.
 	getPixelPosition(tileMap, x, y){
 		
@@ -85,8 +92,15 @@ class Character{
 	/// Grid Navigation
 	//////////////////////////
 
-	move(x, y){
+	move(tileMap, x, y){
+		let prevX = this.x;
+		let prevY = this.y;
+		console.log(prevX, prevY)
+
+		this.setPreviousPosition(prevX, prevY);
 		this.setPosition(x, y);
+		this.enterCell(tileMap, x, y);
+		this.leaveCell(tileMap, prevX, prevY);
 	};
 
 	setPath( newPath ){
@@ -101,17 +115,18 @@ class Character{
 		return this._path.length > 0 || !this.isAtDestination()
 	};
 
-	updateMove(){
+	updateMove(tileMap){
 		if ( this.shouldMove() ){
 			if(this._path.length > 0){
 				let nextCell = this._path.pop();
-				this.move(nextCell.x, nextCell.y);
+				this.move(tileMap, nextCell.x, nextCell.y);
 			};
+
 		};
 	}
 
 	update(tileMap, x, y){
-		this.updateMove();
+		this.updateMove(tileMap);
 		this.updatePixelPosition(tileMap, x, y);
 	};
 
@@ -132,7 +147,15 @@ class Character{
 		x = Math.floor(x);
 		y = Math.floor(y);
 
-		return tileMap.isInBounds(x, y) && !tileMap.isBarrier(x, y)
+		return tileMap.isInBounds(x, y) && !tileMap.isBarrier(x, y) && !tileMap.isOccupied(x, y)
+	};
+
+	enterCell(tileMap, x, y){
+		tileMap.addEntityToCell(this, x, y)
+	};
+
+	leaveCell(tileMap, x, y){
+		tileMap.removeEntityFromCell(this, x, y)
 	};
 
 	startCharacterMove(directionIndex, tileMap){

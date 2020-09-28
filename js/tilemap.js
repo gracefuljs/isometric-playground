@@ -12,6 +12,7 @@ class TileMap{
 			this.selectedTile = [];
 			this.highlightedTile = [];
 			this.path = [];
+			this.entities = [];
 
 		};
 
@@ -22,7 +23,15 @@ class TileMap{
 		};
 
 		setGridData(grid){
-			this.gridData = [...grid];
+			this.gridData = grid.map(row => row.map(cell => [cell, [], null]));;
+		};
+
+		getCell(x, y){
+			return this.gridData[y][x]
+		};
+
+		getCellGroundData(x, y){
+			return this.getCell(x, y)[0]
 		};
 
 
@@ -64,7 +73,21 @@ class TileMap{
 
 		isBarrier(x, y){
 			let barrierTileIndexes = [0, 1, 2, 3, 15]; //Tiles that the character can't walk over.
-			return barrierTileIndexes.indexOf(this.gridData[y][x]) > -1
+			return barrierTileIndexes.indexOf(this.gridData[y][x][0]) > -1
+		};
+
+		isOccupied(x, y){
+			return this.getCell(x, y)[1].length > 0
+		};
+
+		addEntityToCell(entity, x, y){
+			let cell = this.getCell(x, y)[1];
+			cell.push(entity);
+		};
+
+		removeEntityFromCell(entity, x, y){
+			let cell = this.getCell(x, y)[1];
+			this.getCell(x, y)[1] = cell.filter(ent => ent !== entity); 
 		};
 
 		onMouseMove(screenX, screenY){
@@ -97,7 +120,7 @@ class TileMap{
 				
 				let row = this.gridData[y];
 				for(let x = 0; x < row.length; x++){
-					this.drawImageTile(x, y, row[x]);
+					this.drawImageTile(x, y, row[x][0]);
 				};
 			};
 

@@ -18,6 +18,7 @@ import { Input } from './input.js';
 
 		init(){
 			this.loadGraphics();
+			this.initCharacters();
 			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
 		};
 
@@ -35,7 +36,7 @@ import { Input } from './input.js';
 			this.tileMap.setGridData(grid);
 		};
 
-		initPlayer(name, x, y, imgURL){
+		createPlayer(name, x, y, imgURL){
 			let layer = this.getCharacterLayer();
 
 			this.player = new Character(name, x, y, imgURL);
@@ -61,6 +62,12 @@ import { Input } from './input.js';
 
 		registerCharacter(characterID, characterObject){
 			this.characters.set(characterID, characterObject)
+		};
+
+		initCharacters(){
+			this.characters.forEach( (character) => {
+				this.tileMap.addEntityToCell(character, character.x, character.y);
+			});
 		};
 
 
@@ -160,7 +167,7 @@ import { Input } from './input.js';
 
 	//Game Object
 	game.initTileMap(game.getScreenWidth(), game.getScreenHeight(), 60, 30, "images/tileset.png", grid);
-	game.initPlayer("Violet", 1, 8, "images/violet.png");
+	game.createPlayer("Violet", 1, 8, "images/violet.png");
 
 	game.createCharacter("Jenna", 4, 7, "images/jenna.png");
 	game.createCharacter("Alaya", 11, 5, "images/alaya.png");
