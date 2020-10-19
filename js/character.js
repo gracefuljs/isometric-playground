@@ -11,6 +11,7 @@ class Character{
 		this.destY = y;
 		this.prevX = x;
 		this.prevY = y;
+		this.stepSize = 0.5;
 		this._path = [];
 		this.pathfinder = new Pathfinder(this);
 		this.imgURL = imgURL;
@@ -92,15 +93,26 @@ class Character{
 	/// Grid Navigation
 	//////////////////////////
 
-	move(tileMap, x, y){
-		let prevX = this.x;
-		let prevY = this.y;
-		console.log(prevX, prevY)
+	move(tileMap){
+		let newX = this.x;
+		let newY = this.y;
+		let oldOccupiedCells = this.getOccupiedCells(newX, newY);
 
-		this.setPreviousPosition(prevX, prevY);
-		this.setPosition(x, y);
-		this.enterCell(tileMap, x, y);
-		this.leaveCell(tileMap, prevX, prevY);
+		if(this.x < this.destX){newX = this.x + this.stepSize};
+		if(this.x > this.destX){newX = this.x - this.stepSize};
+		if(this.y < this.destY){newY = this.y + this.stepSize};
+		if(this.y > this.destY){newY = this.y - this.stepSize};
+
+
+		let newOccupiedCells = this.getOccupiedCells(newX, newY);
+
+		let newCells = newOccupiedCells.filter( cell1 => !oldOccupiedCells.find(cell2 => cell1[0] === cell2[0] && cell1[1] === cell2[1]) );
+		let oldCells = oldOccupiedCells.filter( cell1 => !newOccupiedCells.find(cell2 => cell1[0] === cell2[0] && cell1[1] === cell2[1]) );
+
+		this.setPosition(newX, newY);
+		newCells.forEach(cell => {this.enterCell(tileMap, cell[0], cell[1])}, this);
+		oldCells.forEach(cell => {this.leaveCell(tileMap, cell[0], cell[1])}, this);
+
 	};
 
 	setPath( newPath ){
@@ -111,19 +123,42 @@ class Character{
 		return this.x === this.destX && this.y === this.destY
 	};
 
+	getOccupiedCells(x, y){
+		let cellX1 = Math.floor(x);
+		let cellY1 = Math.floor(y);
+
+		let cellX2 = ( x > cellX1 ) ? cellX1 + 1 : cellX1;
+		let cellY2 = ( y > cellY1 ) ? cellY1 + 1 : cellY1;
+
+		let occupiedCells = [ [cellX1, cellY1] ]
+
+		if(cellX1 !== cellX2 || cellY1 !== cellY2){
+			occupiedCells.push([cellX2, cellY2])
+		};
+
+		return occupiedCells
+	}
+
 	shouldMove(){
 		return this._path.length > 0 || !this.isAtDestination()
 	};
 
 	updateMove(tileMap){
-		if ( this.shouldMove() ){
-			if(this._path.length > 0){
-				let nextCell = this._path.pop();
-				this.move(tileMap, nextCell.x, nextCell.y);
-			};
-
+		if(!this.isAtDestination()){
+			this.move(tileMap)
+		}
+		
+		else if(this._path.length > 0){
+			let nextCell = this._path.pop();
+			this.updateDestination(nextCell.x, nextCell.y)
 		};
-	}
+	};
+
+	updateDestination(x, y){
+		this.destX = x;
+		this.destY = y;
+	};
+
 
 	update(tileMap, x, y){
 		this.updateMove(tileMap);
@@ -165,10 +200,7 @@ class Character{
 		let newY = this.y + dY;
 
 		if(this.canTraverse(tileMap, newX, newY)){
-			this.x = newX;
-			this.y = newY;
-			this.destX = newX;
-			this.destY = newY;
+			this.updateDestination(newX, newY);
 
 			this.update(tileMap, this.x, this.y)
 		} 
