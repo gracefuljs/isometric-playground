@@ -112,7 +112,8 @@ class Character{
 		this.setPosition(newX, newY);
 		newCells.forEach(cell => {this.enterCell(tileMap, cell[0], cell[1])}, this);
 		oldCells.forEach(cell => {this.leaveCell(tileMap, cell[0], cell[1])}, this);
-
+		// this.enterCell(tileMap, x, y);
+		// this.leaveCell(tileMap, prevX, prevY);
 	};
 
 	setPath( newPath ){
