@@ -26,6 +26,12 @@ import { Input } from './input.js';
 			this.screen = new Screen(container, width, height);
 		};
 
+		//For debugging purposes
+		initBackgroundLayer(){
+			let layer = this.screen.getScreenLayer("background");
+			layer.canvas.classList.add("background");
+		};
+
 		initTileMap(width, height, tileWidth, tileHeight, imgURL, gridData){
 			let layer = this.getTileMapLayer();
 
@@ -160,10 +166,14 @@ import { Input } from './input.js';
 	game.initScreen(container, window.innerWidth, window.innerHeight);
 
 	//Game layers
+	game.screen.createLayer("background");
 	game.screen.createLayer("tileMap");
 	game.screen.createLayer("undercharacter");
 	game.screen.createLayer("characterMap", true);
 	game.screen.createLayer("guiMap");
+
+	//Debugging
+	game.initBackgroundLayer();
 
 	//Game Object
 	game.initTileMap(game.getScreenWidth(), game.getScreenHeight(), 60, 30, "images/tileset.png", grid);

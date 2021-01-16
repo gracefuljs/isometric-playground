@@ -100,6 +100,8 @@ class TileMap{
 
 			let [cellX, cellY] = this.getTileFromScreenCoords(screenX, screenY);
 			this.clickedTile = [cellX, cellY];
+			console.log(screenX, screenY)
+			console.log(this.getTileCoords(cellX, cellY))
 		};
 
 		update(input){
