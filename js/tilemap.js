@@ -16,10 +16,15 @@ class TileMap{
 
 		};
 
-		loadBitmap(callBack){
-			this.mapBitmap = document.createElement("img");
-			this.mapBitmap.addEventListener("load", () => {this.draw()});
-			this.mapBitmap.src = this.imgURL;
+		registerBitmap(imgCache){
+			
+			return new Promise( (resolve) => {
+				this.mapBitmap = document.createElement("img");
+				imgCache.set(this.imgURL, this.bitmap);
+				this.mapBitmap.addEventListener("load", () => { resolve(true) });
+				this.mapBitmap.addEventListener("error", () => { resolve(true) });
+				this.mapBitmap.src = this.imgURL;
+			})
 		};
 
 		setGridData(grid){
@@ -100,8 +105,6 @@ class TileMap{
 
 			let [cellX, cellY] = this.getTileFromScreenCoords(screenX, screenY);
 			this.clickedTile = [cellX, cellY];
-			console.log(screenX, screenY)
-			console.log(this.getTileCoords(cellX, cellY))
 		};
 
 		update(input){

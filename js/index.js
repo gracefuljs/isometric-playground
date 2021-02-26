@@ -10,16 +10,42 @@ import { Input } from './input.js';
 		constructor(){
 			this.screen = null;
 			this.tileMap = null;
+			this.isLoading = false;
 			this.inputHandler = new Input();
 			this.characters = new Map();
 			this.player = null;
 			this._lastTick = null;
+			this.graphicsCache = new Map();
 		};
 
 		init(){
-			this.loadGraphics();
-			this.initCharacters();
-			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
+			
+			this.isLoading = true;
+
+			//Create Specialized GUI layer later...
+			let gui = this.getGUILayer();
+			gui.draw = function (game){
+				this.clear();
+				this.sortChildren();
+				this.children.forEach((child) => {
+					child.draw(game);
+				})
+			};
+			gui.addChild({layer:gui, draw(game){
+				if(game.isLoading){
+					this.layer.context.fillStyle = "#000000";
+					this.layer.context.font = '148px serif';
+				  	this.layer.context.fillText('Loading...', -this.layer.canvas.width/5, this.layer.canvas.height/2);
+				}
+			}});
+			gui.draw(this)
+
+			this.loadGraphics()
+				.then( () => {
+					this.initCharacters();
+					window.requestAnimationFrame((timestamp) => this.loop(timestamp));
+					this.isLoading = false;
+				});
 		};
 
 		initScreen(container, width, height){
@@ -36,7 +62,6 @@ import { Input } from './input.js';
 			let layer = this.getTileMapLayer();
 
 			this.tileMap = new TileMap(layer, width, height, tileWidth, tileHeight, imgURL);
-			this.tileMap.loadBitmap();
 			layer.addChild(this.tileMap);
 
 			this.tileMap.setGridData(grid);
@@ -47,9 +72,6 @@ import { Input } from './input.js';
 
 			this.player = new Character(name, x, y, imgURL);
 			this.player.setLayer( layer );
-			this.player.loadBitmap( () => {
-				[this.x, this.y] = this.player.getPosition(this.tileMap, x, y);
-			});
 			layer.addChild(this.player);
 			this.registerCharacter("player", this.player);
 		};
@@ -59,9 +81,6 @@ import { Input } from './input.js';
 
 			let character = new Character(name, x, y, imgURL);
 			character.setLayer(layer);
-			character.loadBitmap( () => {
-				console.log(`Character ${name} has been loaded.`)
-			});
 			layer.addChild(character);
 			this.registerCharacter(name, character);
 		};
@@ -74,10 +93,20 @@ import { Input } from './input.js';
 			this.characters.forEach( (character) => {
 				this.tileMap.addEntityToCell(character, character.x, character.y);
 			});
+
+			[this.x, this.y] = this.player.getPosition();
 		};
 
+		loadGraphics(){
 
-		loadGraphics(){};
+			let allGraphics = [
+			this.tileMap,
+			...this.characters.values()
+			].map( (graphic) => graphic.registerBitmap(this.graphicsCache), this);
+
+			return Promise.all(allGraphics)
+
+		};
 
 		update(timestamp){
 			this.characters.forEach( (character) => {character.update(this.tileMap, character.x, character.y)}, this );
@@ -87,8 +116,6 @@ import { Input } from './input.js';
 			this.update(timestamp);
 			this.screen.clearScreen();
 			this.screen.draw(this.inputHandler);
-			//this.screen
-			//this.player.draw(this.player.xPos, this.player.yPos);
 			window.requestAnimationFrame((timestamp)=>{this.loop(timestamp)});
 		};
 
@@ -96,7 +123,6 @@ import { Input } from './input.js';
 			this.inputHandler.mouseHandler(this.screen, this.tileMap, event);
 			
 			let [screenX, screenY] = this.inputHandler.getMouseCoords();
-			//this.screen.getScreenCoordsWithOffset(...this.inputHandler.getMouseCoords());
 			this.tileMap.onMouseMove(screenX, screenY);
 		};
 
@@ -135,6 +161,10 @@ import { Input } from './input.js';
 
 		getCharacterLayer(){
 			return this.screen.getScreenLayer("characterMap")
+		};
+
+		getGUILayer(){
+			return this.screen.getScreenLayer("guiMap")
 		};
 
 	};
@@ -186,7 +216,7 @@ import { Input } from './input.js';
 
 	window.addEventListener("load",()=>{ game.init()});
 	document.querySelector(".container").addEventListener("mousemove", (event) => {game.mouseHandler(event)});
-	window.addEventListener("resize", () => {game.screen.updateScreen(window.innerWidth, window.innerHeight)});
+	window.addEventListener("resize", () => {game.screen.updateScreen(window.innerWidth, window.innerHeight);console.log(game.screen.container.offsetLeft)});
 	document.querySelector(".container").addEventListener("click", (event)=>{game.clickHandler(event)});
 	window.addEventListener("keydown", (event)=>{game.keyHandler(event)})
 

@@ -44,11 +44,22 @@ class Character{
 		this.imgURL = imgURL;
 	};
 
-	loadBitmap(callBack){
-		this.bitmap = document.createElement("img");
-		this.bitmap.addEventListener("load", callBack );
-		this.bitmap.src = this.imgURL;
+	registerBitmap(imgCache){
+		
+		return new Promise( (resolve) => {
+				this.bitmap = document.createElement("img");
+				imgCache.set(this.imgURL, this.bitmap);
+				this.bitmap.addEventListener("load", () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
+				this.bitmap.addEventListener("error", () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
+				this.bitmap.src = this.imgURL;
+			})
 	};
+
+	// loadBitmap(callBack){
+	// 	this.bitmap = document.createElement("img");
+	// 	this.bitmap.addEventListener("load", callBack );
+	// 	this.bitmap.src = this.imgURL;
+	// };
 
 	
 

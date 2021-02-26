@@ -18,3 +18,7 @@ While there are other characters in the game, the player can't interact with the
 In the future, I will create my own tileset, but until then, the tileset is provided by [spasquini via DeviantArt](https://www.deviantart.com/spasquini/art/Isometric-new-tiles-274882986). The character sketches are mine.
 
 See demo [here](https://gracefuljs.github.io/isometric-playground). As of right now, it's a little janky on mobile, but I'm working on fixing it.
+
+### Most Recent Updates
+- Began fixing mobile  
+- Added rudimentary preloading
