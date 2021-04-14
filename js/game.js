@@ -15,6 +15,7 @@ class Game{
 		this._lastTick = null;
 		this.graphicsCache = new Map();
 		this.data = [];
+		this.lastUpdate = -1;
 	};
 
 	init(){
@@ -50,7 +51,12 @@ class Game{
 				
 
 				this.tileMap.centerViewportOnEntity(this.player);
-				window.requestAnimationFrame((timestamp) => this.loop(timestamp));
+				
+				window.requestAnimationFrame((timestamp) => {
+					this.lastUpdate = timestamp;
+					this.loop(timestamp)
+				});
+				
 				this.isLoading = false;
 			});
 	};
@@ -141,13 +147,17 @@ class Game{
 	
 	//------------------------ Runtime Functions ---------------------------
 
-	update(timestamp){
+	update(deltaTime){
 		this.inputHandler.update();
-		this.characters.forEach( (character) => {character.update(this.tileMap, character.x, character.y)}, this );
+		this.characters.forEach( (character) => {character.update(this.tileMap, character.x, character.y, deltaTime)}, this );
 	};
 
 	loop(timestamp){
-		this.update(timestamp);
+
+		const delta = timestamp - this.lastUpdate / 1000;
+		this.lastUpdate = timestamp;
+
+		this.update(delta);
 		this.screen.clearScreen();
 		this.screen.draw(this.inputHandler);
 		this.tileMap.centerViewportOnEntity(this.player);

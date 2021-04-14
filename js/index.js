@@ -1,5 +1,4 @@
 import { Game } from './game.js';
-import { Debugger } from './debugger.js';
 
 (function(){
 

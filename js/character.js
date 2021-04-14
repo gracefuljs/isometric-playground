@@ -92,12 +92,12 @@ class Character{
 		this._yPixel = yPos;
 	};
 
-	stepForward(tileMap, newX, newY){
+	stepForward(tileMap, newX, newY, delta){
 
-		if(this.x < this.destX){ newX = Math.min(this.x + this.stepSize, this.destX) };
-		if(this.x > this.destX){ newX = Math.max(this.x - this.stepSize, this.destX) };
-		if(this.y < this.destY){ newY = Math.min(this.y + this.stepSize, this.destY) };
-		if(this.y > this.destY){ newY = Math.max(this.y - this.stepSize, this.destY) };
+		if(this.x < this.destX){ newX = Math.min(this.x + (this.stepSize * delta), this.destX) };
+		if(this.x > this.destX){ newX = Math.max(this.x - (this.stepSize * delta), this.destX) };
+		if(this.y < this.destY){ newY = Math.min(this.y + (this.stepSize * delta), this.destY) };
+		if(this.y > this.destY){ newY = Math.max(this.y - (this.stepSize * delta), this.destY) };
 
 		return {x:newX, y:newY}
 	};
@@ -107,7 +107,7 @@ class Character{
 	///--------------------------- Grid Navigation -----------------------------------------------------------
 
 
-	move(tileMap){
+	move(tileMap, delta){
 		let newX = this.x;
 		let newY = this.y;
 		let oldOccupiedCells = this.getOccupiedCells(newX, newY);
@@ -117,7 +117,7 @@ class Character{
 		// if(this.y < this.destY){newY = this.y + this.stepSize};
 		// if(this.y > this.destY){newY = this.y - this.stepSize};
 
-		let {x, y} = this.stepForward(tileMap, newX, newY);
+		let {x, y} = this.stepForward(tileMap, newX, newY, delta);
 		newX = x;
 		newY = y;
 
@@ -156,9 +156,9 @@ class Character{
 		return occupiedCells
 	}
 
-	updateMove(tileMap){
+	updateMove(tileMap, delta){
 		if(!this.isAtDestination()){
-			this.move(tileMap)
+			this.move(tileMap, delta)
 		}
 		
 		else if(this._path.length > 0){
@@ -173,8 +173,8 @@ class Character{
 	};
 
 
-	update(tileMap, x, y){
-		this.updateMove(tileMap);
+	update(tileMap, x, y, delta){
+		this.updateMove(tileMap, delta);
 		this.updatePixelPosition(tileMap, x, y);
 	};
 

@@ -7,9 +7,9 @@ The player controls the character Violet. He can navigate through the map via th
 
 
 ### Other Characters and Interactions
-![Jenna](https://gracefuljs.github.io/isometric-playground/images/jenna.png)
-![Alaya](https://gracefuljs.github.io/isometric-playground/images/alaya.png)
-![Shie](https://gracefuljs.github.io/isometric-playground/images/shie.png)  
+![Jenna](https://gracefuljs.github.io/isometric-playground/assets/images/jenna.png)
+![Alaya](https://gracefuljs.github.io/isometric-playground/assets/images/alaya.png)
+![Shie](https://gracefuljs.github.io/isometric-playground/assets/images/shie.png)  
 
 While there are other characters in the game, the player can't interact with them just yet.
 
