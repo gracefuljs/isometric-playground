@@ -11,7 +11,7 @@ class Character{
 		this.destY = y;
 		this.prevX = x;
 		this.prevY = y;
-		this.stepSize = 0.5;
+		this.stepSize = 0.47;
 		this._path = [];
 		this.pathfinder = new Pathfinder(this);
 		this.imgURL = imgURL;
@@ -20,10 +20,21 @@ class Character{
 	};
 
 	
+	//------------------------ Initializaion -----------------------------------------
 
-	//////////////////////////
-	/// Sprite Manipulation
-	//////////////////////////
+	registerBitmap(imgCache){
+		
+		return new Promise( (resolve) => {
+				this.bitmap = document.createElement("img");
+				imgCache.set(this.imgURL, this.bitmap);
+				this.bitmap.addEventListener("load",  () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
+				this.bitmap.addEventListener("error", () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
+				this.bitmap.src = this.imgURL;
+			})
+	};
+
+
+	//------------------------ Sprite Manipulation -----------------------------------------
 
 	
 	draw(x, y){
@@ -44,28 +55,10 @@ class Character{
 		this.imgURL = imgURL;
 	};
 
-	registerBitmap(imgCache){
-		
-		return new Promise( (resolve) => {
-				this.bitmap = document.createElement("img");
-				imgCache.set(this.imgURL, this.bitmap);
-				this.bitmap.addEventListener("load", () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
-				this.bitmap.addEventListener("error", () => { console.log(`Character ${this.name} has been loaded.`); resolve(true) });
-				this.bitmap.src = this.imgURL;
-			})
-	};
 
-	// loadBitmap(callBack){
-	// 	this.bitmap = document.createElement("img");
-	// 	this.bitmap.addEventListener("load", callBack );
-	// 	this.bitmap.src = this.imgURL;
-	// };
 
 	
-
-	//////////////////////////
-	/// Pixel Manipulation
-	//////////////////////////
+	//--------------------------- Pixel Manipulation ----------------------------
 
 
 	getPosition(){
@@ -99,22 +92,36 @@ class Character{
 		this._yPixel = yPos;
 	};
 
+	stepForward(tileMap, newX, newY){
 
-	//////////////////////////
-	/// Grid Navigation
-	//////////////////////////
+		if(this.x < this.destX){ newX = Math.min(this.x + this.stepSize, this.destX) };
+		if(this.x > this.destX){ newX = Math.max(this.x - this.stepSize, this.destX) };
+		if(this.y < this.destY){ newY = Math.min(this.y + this.stepSize, this.destY) };
+		if(this.y > this.destY){ newY = Math.max(this.y - this.stepSize, this.destY) };
+
+		return {x:newX, y:newY}
+	};
+
+
+
+	///--------------------------- Grid Navigation -----------------------------------------------------------
+
 
 	move(tileMap){
 		let newX = this.x;
 		let newY = this.y;
 		let oldOccupiedCells = this.getOccupiedCells(newX, newY);
 
-		if(this.x < this.destX){newX = this.x + this.stepSize};
-		if(this.x > this.destX){newX = this.x - this.stepSize};
-		if(this.y < this.destY){newY = this.y + this.stepSize};
-		if(this.y > this.destY){newY = this.y - this.stepSize};
+		// if(this.x < this.destX){newX = this.x + this.stepSize};
+		// if(this.x > this.destX){newX = this.x - this.stepSize};
+		// if(this.y < this.destY){newY = this.y + this.stepSize};
+		// if(this.y > this.destY){newY = this.y - this.stepSize};
 
+		let {x, y} = this.stepForward(tileMap, newX, newY);
+		newX = x;
+		newY = y;
 
+		
 		let newOccupiedCells = this.getOccupiedCells(newX, newY);
 
 		let newCells = newOccupiedCells.filter( cell1 => !oldOccupiedCells.find(cell2 => cell1[0] === cell2[0] && cell1[1] === cell2[1]) );
@@ -123,8 +130,6 @@ class Character{
 		this.setPosition(newX, newY);
 		newCells.forEach(cell => {this.enterCell(tileMap, cell[0], cell[1])}, this);
 		oldCells.forEach(cell => {this.leaveCell(tileMap, cell[0], cell[1])}, this);
-		// this.enterCell(tileMap, x, y);
-		// this.leaveCell(tileMap, prevX, prevY);
 	};
 
 	setPath( newPath ){
@@ -150,10 +155,6 @@ class Character{
 
 		return occupiedCells
 	}
-
-	shouldMove(){
-		return this._path.length > 0 || !this.isAtDestination()
-	};
 
 	updateMove(tileMap){
 		if(!this.isAtDestination()){
@@ -215,7 +216,7 @@ class Character{
 			this.updateDestination(newX, newY);
 
 			this.update(tileMap, this.x, this.y)
-		} 
+		}; 
 	};
 };
 

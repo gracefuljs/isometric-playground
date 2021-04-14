@@ -146,6 +146,7 @@ Pathfinder.prototype.removeNodeFromList = function(arr, node){
 
 Pathfinder.prototype.search = function(tileMap, startX, startY, goalX, goalY){
 
+
 	this.initLists();
 	
 	this.startPoint = new Node(startX, startY);
@@ -161,7 +162,7 @@ Pathfinder.prototype.search = function(tileMap, startX, startY, goalX, goalY){
 		    
 		    this.retracePath(this.currentNode);
 
- 		    return this.finalPath
+			return this.finalPath
 		   
 	    }
 
@@ -171,6 +172,7 @@ Pathfinder.prototype.search = function(tileMap, startX, startY, goalX, goalY){
 	    	this.currentNode = this.findNextNode(tileMap, this.currentNode);
 	    }
 	}
+
 
 	return []
 };

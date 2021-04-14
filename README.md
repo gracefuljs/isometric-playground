@@ -22,3 +22,12 @@ See demo [here](https://gracefuljs.github.io/isometric-playground). As of right 
 ### Most Recent Updates
 - Began fixing mobile  
 - Added rudimentary preloading
+- Added a rudimentary viewport
+- Minor bug fixes
+
+### TODO
+- Major optimizations
+- Character interactions
+- NPC pathfinding
+- Terrain interactions
+- Animations
